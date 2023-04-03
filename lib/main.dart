@@ -15,12 +15,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => WorkoutData(),
-      child: const MaterialApp(debugShowCheckedModeBanner: false, home: HomePage(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: HomePage(),
+        theme: ThemeData(useMaterial3: true),
       ),
     );
   }
 }
-
-
-
-

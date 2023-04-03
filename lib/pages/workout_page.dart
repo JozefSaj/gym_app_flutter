@@ -51,8 +51,8 @@ class _WorkoutPageState extends State<WorkoutPage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-          TextField(
 
+          TextField(
             controller: exerciseNameController,
           ),
           TextField(

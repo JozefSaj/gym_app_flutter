@@ -1,5 +1,5 @@
-import 'package:first/pages/workout_page.dart';
 import 'package:flutter/material.dart';
+import 'package:gym_app_flutter/pages/workout_page.dart';
 import 'package:provider/provider.dart';
 
 import '../data/workout_data.dart';
@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage>{
   @override
   Widget build(BuildContext context){
     return Consumer<WorkoutData>(builder: (context, value, child) => Scaffold(
-      appBar: AppBar(title: Text("Podme si zacvicit jupiiii")
+      appBar: AppBar(title: Text("Workout tracker")
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: createNewWorkout,

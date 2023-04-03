@@ -7,10 +7,14 @@ import '../modules/workout.dart';
 class WorkoutData extends ChangeNotifier{
 
   List<Workout> workoutList = [
-    Workout(name: "Upper body",
+    Workout(name: "Public Upper Body",
       exercise: [Exercise(
         name: "Lat Pulldown", weight: "50", reps: "10", sets: "3"),],
-    )
+    ),
+    Workout(name: "Public Lower body",
+      exercise: [Exercise(
+          name: "Lat Pulldown", weight: "50", reps: "10", sets: "3"),],
+    ),
 
   ];
 
