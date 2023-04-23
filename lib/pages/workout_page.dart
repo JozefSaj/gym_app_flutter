@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../data/workout_data.dart';
@@ -19,70 +21,132 @@ class _WorkoutPageState extends State<WorkoutPage> {
   }
 
   void save(){
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    _formKey.currentState!.save();
     Provider.of<WorkoutData>(context, listen: false).addExercise(
       widget.workoutName,
-      exerciseNameController.text,
-      exerciseWeightController.text,
-      exerciseRepsController.text,
-      exerciseSetsController.text);
+      exerciseNameController,
+      exerciseWeightController,
+      exerciseRepsController,
+      exerciseSetsController);
     Navigator.pop(context);
-    exerciseNameController.clear();
-    exerciseWeightController.clear();
-    exerciseRepsController.clear();
-    exerciseSetsController.clear();
   }
 
   void cancel(){
     Navigator.pop(context);
-    exerciseNameController.clear();
-    exerciseWeightController.clear();
-    exerciseRepsController.clear();
-    exerciseSetsController.clear();
+
   }
 
-  final exerciseNameController = TextEditingController();
-  final exerciseWeightController = TextEditingController();
-  final exerciseRepsController = TextEditingController();
-  final exerciseSetsController = TextEditingController();
+  String exerciseNameController = '';
+  String exerciseWeightController = '';
+  String exerciseRepsController = '';
+  String exerciseSetsController = '';
+  final _formKey = GlobalKey<FormState>();
   void createNewExercise(){
-    showDialog(context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Add  a new exercise'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+    showDialog(
+      context: context,
+      builder: (context) => Center(
+        child: SingleChildScrollView(
+          child: AlertDialog(
+            title: const Text("Add a new exercise"),
+            content: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    onSaved: (newValue) => exerciseNameController = newValue!,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      label: Text('Exercise Name'),
+                      prefixIcon: Icon(Icons.subject, size: 20),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty){
+                        return "Exercise Name should not be empty";
+                      }
+                    },
+                  ),TextFormField(
+                    onSaved: (newValue) => exerciseWeightController = newValue!,
+                    decoration:  InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      label: Text('Weight'),
+                      prefixIcon: Container(child: Center
+                        (child: FaIcon(FontAwesomeIcons.weightHanging),
+                      ),
+                        width: 40,
 
-          TextField(
-            controller: exerciseNameController,
-          ),
-          TextField(
-            controller: exerciseWeightController,
-          ),
-          TextField(
-            controller: exerciseRepsController,
-          ),
+                      )
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty){
+                        return "Weight should not be empty";
+                      }
+                    },
+                  ),TextFormField(
+                    onSaved: (newValue) => exerciseRepsController = newValue!,
+                    decoration:  InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      label: Text('Reps'),
+                      prefixIcon: Container(child: Center
+                        (child: FaIcon(FontAwesomeIcons.dumbbell),
+                      ),
+                        width: 40,
 
-          TextField(
-            controller: exerciseSetsController,
-          ),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty){
+                        return "Reps should not be empty";
+                      }
+                    },
+                  ),TextFormField(
+                    onSaved: (newValue) => exerciseSetsController = newValue!,
+                    decoration:  InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      label: Text('Sets'),
+                      prefixIcon: Container(child: Center
+                        (child: FaIcon(FontAwesomeIcons.repeat),
+                      ),
+                        width: 40,
 
-          ],),
-          actions: [
-            MaterialButton(
-                onPressed: save,
-                child: Text("save")),
-            MaterialButton(
-                onPressed: cancel,
-                child: Text("cancel")),
-          ],
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty){
+                        return "Sets should not be empty";
+                      }
+                    },
+                  )
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: cancel,
+                  child: Text("cancel")),
+              TextButton(
+                  onPressed: save,
+                  child: Text("save"))
+
+            ],
+          ),
         ),
+      ),
     );
+
   }
   @override
   Widget build(BuildContext context) {
     return Consumer<WorkoutData>(
       builder: (context, value, child) => Scaffold(
-        appBar: AppBar(title: Text(widget.workoutName)),
+        appBar: AppBar(title: Text(widget.workoutName),),
         floatingActionButton: FloatingActionButton(
           onPressed: createNewExercise,
           child: Icon(Icons.add),
