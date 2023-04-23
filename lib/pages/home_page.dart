@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gym_app_flutter/pages/workout_page.dart';
 import 'package:provider/provider.dart';
@@ -13,26 +14,50 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>{
 
-  final newWorkoutNameController = TextEditingController();
+  String newWorkoutNameController = '';
+  final _formKey = GlobalKey<FormState>();
 
   void createNewWorkout(){
     showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Create new workout"),
-          content: TextField(
-            controller: newWorkoutNameController,
-          ),
-          actions: [
-            MaterialButton(
-                onPressed: save,
-                child: Text("save")),
-            MaterialButton(
-                onPressed: cancel,
-                child: Text("cancel")),
+      context: context,
+      builder: (context) => Center(
+        child: SingleChildScrollView(
+          child: AlertDialog(
+            title: Text("Create new workout"),
+            content: Form(
+              key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      onSaved: (newValue) => newWorkoutNameController = newValue!,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                        label: Text('Workout Name'),
+                        prefixIcon: Icon(Icons.subject),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty){
+                          return "Workout Name should not be empty";
+                        }
+                      },
+                    )
+                  ],
+                ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: cancel,
+                  child: Text("cancel")),
+              TextButton(
+                  onPressed: save,
+                  child: Text("save"))
 
-          ],
+            ],
+          ),
         ),
+      ),
     );
 
   }
@@ -42,21 +67,23 @@ class _HomePageState extends State<HomePage>{
   }
 
   void save(){
-  Provider.of<WorkoutData>(context, listen: false).addWorkout(newWorkoutNameController.text);
-  Navigator.pop(context);
-  newWorkoutNameController.clear();
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    _formKey.currentState!.save();
+    Provider.of<WorkoutData>(context, listen: false).addWorkout(newWorkoutNameController);
+    Navigator.pop(context);
   }
 
   void cancel(){
     Navigator.pop(context);
-    newWorkoutNameController.clear();
   }
 
 
   @override
   Widget build(BuildContext context){
     return Consumer<WorkoutData>(builder: (context, value, child) => Scaffold(
-      appBar: AppBar(title: Text("Workout tracker")
+      appBar: AppBar(title: Text("Workout tracker"), actions: [IconButton(onPressed: () => FirebaseAuth.instance.signOut(), icon: Icon(Icons.logout))]
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: createNewWorkout,
@@ -65,11 +92,11 @@ class _HomePageState extends State<HomePage>{
       body: ListView.builder(
           itemCount: value.getWorkoutList().length,
           itemBuilder: (context, index) => ListTile(
-              title: Text(value.getWorkoutList()[index].name),
+            title: Text(value.getWorkoutList()[index].name),
             trailing: IconButton(
-              icon: Icon(Icons.arrow_forward_ios),
+              icon: const Icon(Icons.arrow_forward_ios),
               onPressed:() =>
-              goToWorkoutPage(value.getWorkoutList()[index].name),
+                  goToWorkoutPage(value.getWorkoutList()[index].name),
             ),
           )
       ),
