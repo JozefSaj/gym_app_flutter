@@ -69,7 +69,10 @@ class _WorkoutPageState extends State<WorkoutPage> {
                         return "Exercise Name should not be empty";
                       }
                     },
-                  ),TextFormField(
+                  ),
+                  const SizedBox(height: 10
+                  ),
+                  TextFormField(
                     onSaved: (newValue) => exerciseWeightController = newValue!,
                     decoration:  InputDecoration(
                       border: OutlineInputBorder(),
@@ -87,7 +90,10 @@ class _WorkoutPageState extends State<WorkoutPage> {
                         return "Weight should not be empty";
                       }
                     },
-                  ),TextFormField(
+                  ),
+                  const SizedBox(height: 10
+                    ),
+                  TextFormField(
                     onSaved: (newValue) => exerciseRepsController = newValue!,
                     decoration:  InputDecoration(
                       border: OutlineInputBorder(),
@@ -105,7 +111,10 @@ class _WorkoutPageState extends State<WorkoutPage> {
                         return "Reps should not be empty";
                       }
                     },
-                  ),TextFormField(
+                  ),
+                  const SizedBox(height: 10
+                  ),
+                  TextFormField(
                     onSaved: (newValue) => exerciseSetsController = newValue!,
                     decoration:  InputDecoration(
                       border: OutlineInputBorder(),
@@ -146,10 +155,11 @@ class _WorkoutPageState extends State<WorkoutPage> {
   Widget build(BuildContext context) {
     return Consumer<WorkoutData>(
       builder: (context, value, child) => Scaffold(
-        appBar: AppBar(title: Text(widget.workoutName),),
-        floatingActionButton: FloatingActionButton(
+        appBar: AppBar(title: Text(widget.workoutName, style: TextStyle(fontSize: 35),),),
+        floatingActionButton: FloatingActionButton.extended(
           onPressed: createNewExercise,
-          child: Icon(Icons.add),
+          icon: const Icon(Icons.add),
+          label: const Text('Add new exercise'),
         ),
         body: ListView.builder(
           itemCount: value.numberOfExercises(widget.workoutName),
