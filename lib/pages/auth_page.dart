@@ -32,7 +32,7 @@ class _AuthPageState extends State<AuthPage> {
 
         FirebaseFirestore.instance.collection('users').doc(response.user!.uid).set({
           'email': email,
-          'isAdmin': true,
+          'isAdmin': false,
         });
         FirebaseFirestore.instance.collection('users').add({'userId': FirebaseAuth.instance.currentUser!});
       }
