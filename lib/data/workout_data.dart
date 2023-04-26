@@ -10,10 +10,12 @@ class WorkoutData extends ChangeNotifier{
     Workout(name: "Public Upper Body",
       exercise: [Exercise(
         name: "Lat Pulldown", weight: "50", reps: "10", sets: "3"),],
+      isPublic: true,
     ),
     Workout(name: "Public Lower body",
       exercise: [Exercise(
           name: "Lat Pulldown", weight: "50", reps: "10", sets: "3"),],
+      isPublic: true,
     ),
 
   ];
@@ -24,9 +26,12 @@ class WorkoutData extends ChangeNotifier{
     return workoutList;
   }
 
+  void rename(String name){
 
-  void addWorkout(String name){
-    workoutList.add(Workout(name: name, exercise: []));
+  }
+
+  void addWorkout(String name, {public = false}){
+    workoutList.add(Workout(name: name, exercise: [], isPublic: public));
     notifyListeners();
 
   }
