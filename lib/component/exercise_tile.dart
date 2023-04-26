@@ -16,7 +16,7 @@ class ExerciseTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey,
+      color: const Color.fromRGBO(217, 216, 218, 1),
       child: ListTile(
         title: TextButton(
           onPressed: () {  },
