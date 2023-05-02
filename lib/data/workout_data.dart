@@ -26,9 +26,6 @@ class WorkoutData extends ChangeNotifier{
     return workoutList;
   }
 
-  void rename(String name){
-
-  }
 
   void addWorkout(String name, {public = false}){
     workoutList.add(Workout(name: name, exercise: [], isPublic: public));
