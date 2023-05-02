@@ -89,6 +89,9 @@ class _WorkoutPageState extends State<WorkoutPage> {
                       if (value == null || value.isEmpty){
                         return "Weight should not be empty";
                       }
+                      if (int.tryParse(value) == null) {
+                        return 'Only Number are allowed';
+                      }
                     },
                   ),
                   const SizedBox(height: 10
@@ -110,6 +113,9 @@ class _WorkoutPageState extends State<WorkoutPage> {
                       if (value == null || value.isEmpty){
                         return "Reps should not be empty";
                       }
+                      if (int.tryParse(value) == null) {
+                        return 'Only Number are allowed';
+                      }
                     },
                   ),
                   const SizedBox(height: 10
@@ -130,6 +136,9 @@ class _WorkoutPageState extends State<WorkoutPage> {
                     validator: (value) {
                       if (value == null || value.isEmpty){
                         return "Sets should not be empty";
+                      }
+                      if (int.tryParse(value) == null) {
+                        return 'Only Number are allowed';
                       }
                     },
                   )
@@ -155,7 +164,9 @@ class _WorkoutPageState extends State<WorkoutPage> {
   Widget build(BuildContext context) {
     return Consumer<WorkoutData>(
       builder: (context, value, child) => Scaffold(
-        appBar: AppBar(title: Text(widget.workoutName, style: TextStyle(fontSize: 35),),),
+        appBar: AppBar(title: Text(widget.workoutName, style: TextStyle(fontSize: 35),
+        ),
+        ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: createNewExercise,
           icon: const Icon(Icons.add),
