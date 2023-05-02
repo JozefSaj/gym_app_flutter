@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({Key? key}) : super(key: key);
@@ -26,15 +27,20 @@ class _AuthPageState extends State<AuthPage> {
     try {
       final UserCredential response;
       if (isLogin) {
-        response = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+        response = await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: email, password: password);
       } else {
-        response = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+        response = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: email, password: password);
 
-        FirebaseFirestore.instance.collection('users').doc(response.user!.uid).set({
+        FirebaseFirestore.instance.collection('users')
+            .doc(response.user!.uid)
+            .set({
           'email': email,
           'isAdmin': false,
         });
-        FirebaseFirestore.instance.collection('users').add({'userId': FirebaseAuth.instance.currentUser!});
+        FirebaseFirestore.instance.collection('users').add(
+            {'userId': FirebaseAuth.instance.currentUser!});
       }
     } on FirebaseAuthException catch (e) {
       print(e.message);
@@ -43,25 +49,43 @@ class _AuthPageState extends State<AuthPage> {
         setState(() => isLoading = false);
       }
     }
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromRGBO(217, 216, 218, 1),
       body: SingleChildScrollView(
         child: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
+          width: MediaQuery
+              .of(context)
+              .size
+              .width,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height,
           padding: const EdgeInsets.all(10),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(
-                height: 100,
+                height: 150,
               ),
-              const Text("Workout Tracker"),
+              Container(
+                  width: 300,
+                  height: 200,
+                  child: Image.asset('images/logo_auth.png')),
               const SizedBox(
-                height: 300,
+                height: 35,
+              ),
+              Text(
+                "Your Workout Companion",
+                style: GoogleFonts.ptSerif(textStyle: TextStyle(fontSize: 35)),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(
+                height: 50,
               ),
               SizedBox(
                 width: 250,
@@ -103,10 +127,10 @@ class _AuthPageState extends State<AuthPage> {
                         },
                         onSaved: (newValue) => password = newValue!,
                         decoration: const InputDecoration(
-                          label: Text('Password',),
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                          prefixIcon: Icon(Icons.vpn_key)
+                            label: Text('Password',),
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            prefixIcon: Icon(Icons.vpn_key)
                         ),
                       ),
                       const SizedBox(height: 8,),
