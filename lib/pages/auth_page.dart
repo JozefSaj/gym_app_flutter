@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AuthPage extends StatefulWidget {
@@ -16,6 +17,7 @@ class _AuthPageState extends State<AuthPage> {
   bool isLoading = false;
   String email = '';
   String password = '';
+  String secondPassword = '';
 
   void submitForm() async {
     if (!_formKey.currentState!.validate()) {
@@ -27,28 +29,51 @@ class _AuthPageState extends State<AuthPage> {
     try {
       final UserCredential response;
       if (isLogin) {
-        response = await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: email, password: password);
+        try {
+          await FirebaseAuth.instance
+              .signInWithEmailAndPassword(email: email, password: password);
+        } on FirebaseAuthException catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(e.message ?? 'Neočakávaná chyba'),
+            behavior: SnackBarBehavior.floating,
+          ));
+        } catch (e) {}
+        response = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: email, password: password);
       } else {
-        response = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-            email: email, password: password);
+        try {
+          await FirebaseAuth.instance
+              .createUserWithEmailAndPassword(email: email, password: password);
+        } on FirebaseAuthException catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(e.message ?? 'Neočakávaná chyba'),
+            behavior: SnackBarBehavior.floating,
+          ));
+        } catch (e) {}
+        response = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: email, password: password);
 
-        FirebaseFirestore.instance.collection('users')
+        FirebaseFirestore.instance
+            .collection('users')
             .doc(response.user!.uid)
             .set({
           'email': email,
           'isAdmin': false,
         });
-        FirebaseFirestore.instance.collection('users').add(
-            {'userId': FirebaseAuth.instance.currentUser!});
+        FirebaseFirestore.instance
+            .collection('users')
+            .add({'userId': FirebaseAuth.instance.currentUser!});
       }
     } on FirebaseAuthException catch (e) {
       print(e.message);
-    } catch (e) {} finally {
+    } catch (e) {
+    } finally {
       if (mounted) {
         setState(() => isLoading = false);
       }
     }
+    // waiting for firebase to load in the data, need to use await as we need to first
+    //wait for firebase then just continue in the method.
   }
 
   @override
@@ -57,20 +82,14 @@ class _AuthPageState extends State<AuthPage> {
       backgroundColor: const Color.fromRGBO(217, 216, 218, 1),
       body: SingleChildScrollView(
         child: Container(
-          width: MediaQuery
-              .of(context)
-              .size
-              .width,
-          height: MediaQuery
-              .of(context)
-              .size
-              .height,
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
           padding: const EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(
-                height: 150,
+                height: 80,
               ),
               Container(
                   width: 300,
@@ -99,6 +118,9 @@ class _AuthPageState extends State<AuthPage> {
                           if (value == null || value.isEmpty) {
                             return 'Email should not be empty';
                           }
+                          if (!value.contains('@')) {
+                            return 'Email not in correct format';
+                          }
 
                           return null;
                         },
@@ -112,7 +134,9 @@ class _AuthPageState extends State<AuthPage> {
                           prefixIcon: Icon(Icons.email_outlined),
                         ),
                       ),
-                      const SizedBox(height: 8,),
+                      const SizedBox(
+                        height: 8,
+                      ),
                       TextFormField(
                         key: const ValueKey('password'),
                         obscureText: true,
@@ -127,17 +151,27 @@ class _AuthPageState extends State<AuthPage> {
                         },
                         onSaved: (newValue) => password = newValue!,
                         decoration: const InputDecoration(
-                            label: Text('Password',),
+                            label: Text(
+                              'Password',
+                            ),
                             border: OutlineInputBorder(),
                             isDense: true,
-                            prefixIcon: Icon(Icons.vpn_key)
-                        ),
+                            prefixIcon: Icon(Icons.vpn_key)),
                       ),
-                      const SizedBox(height: 8,),
+                      const SizedBox(
+                        height: 8,
+                      ),
                       if (!isLogin)
                         TextFormField(
                           obscureText: true,
                           key: const ValueKey('confirm'),
+                          onSaved: (newValue) => secondPassword = newValue!,
+                          validator: (value) {
+                            print(value);
+                            if (password != secondPassword) {
+                              return 'Passwords are not the same';
+                            }
+                          },
                           decoration: const InputDecoration(
                             label: Text('Confirm password'),
                             border: OutlineInputBorder(),
@@ -151,9 +185,11 @@ class _AuthPageState extends State<AuthPage> {
               const SizedBox(
                 height: 20,
               ),
-              isLoading ? const CircularProgressIndicator() : FilledButton(
-                  onPressed: submitForm,
-                  child: Text(isLogin ? "Login" : "Register")),
+              isLoading
+                  ? const CircularProgressIndicator()
+                  : FilledButton(
+                      onPressed: submitForm,
+                      child: Text(isLogin ? "Login" : "Register")),
               const SizedBox(
                 height: 10,
               ),
