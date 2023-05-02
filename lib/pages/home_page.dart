@@ -18,14 +18,13 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String newWorkoutNameController = '';
   String feedback = '';
+  //having different variable for each form, to be easily achievable for provider
   final _formKeyFeedback = GlobalKey<FormState>();
   final _formKeyNewWorkout = GlobalKey<FormState>();
   final _formKeyNewPublicWorkout = GlobalKey<FormState>();
 
   void refresh() {
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   void createNewWorkout(String? rename) {
@@ -39,7 +38,8 @@ class _HomePageState extends State<HomePage> {
       builder: (context) => Center(
         child: SingleChildScrollView(
           child: AlertDialog(
-            title:  Text(rename == null ? "Create new workout" : "Rename your workout"),
+            title: Text(
+                rename == null ? "Create new workout" : "Rename your workout"),
             content: Form(
               key: _formKeyNewWorkout,
               child: Column(
@@ -66,19 +66,20 @@ class _HomePageState extends State<HomePage> {
             actions: [
               TextButton(onPressed: cancel, child: const Text("cancel")),
               if (rename != null)
-                TextButton(onPressed: () {
-                  bool result = validateRename();
-                  if (result) {
-                    print(rename);
-                    _formKeyNewWorkout.currentState!.save();
-                    renameWorkout(newWorkoutNameController, oldName);
-                    Navigator.of(context).pop();
-                    refresh();
-                  }
-
-                }, child: const Text("save")),
+                TextButton(
+                    onPressed: () {
+                      bool result = validateRename();
+                      if (result) {
+                        print(rename);
+                        _formKeyNewWorkout.currentState!.save();
+                        renameWorkout(newWorkoutNameController, oldName);
+                        Navigator.of(context).pop();
+                        refresh();
+                      }
+                    },
+                    child: const Text("save")),
               if (rename == null)
-              TextButton(onPressed: save, child: const Text("save"))
+                TextButton(onPressed: save, child: const Text("save"))
             ],
           ),
         ),
@@ -86,16 +87,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  bool validateRename(){
+  bool validateRename() {
     return _formKeyNewWorkout.currentState!.validate();
-
   }
 
-  void renameWorkout(String newName, String oldName){
-      Workout current = Provider.of<WorkoutData>(context, listen: false).getRelevantWorkout(oldName);
-      current.name = newName;
+  void renameWorkout(String newName, String oldName) {
+    Workout current = Provider.of<WorkoutData>(context, listen: false)
+        .getRelevantWorkout(oldName);
+    current.name = newName;
   }
-
 
   void giveFeedBack(FeedbackData data) {
     showDialog(
@@ -130,7 +130,9 @@ class _HomePageState extends State<HomePage> {
             ),
             actions: [
               TextButton(onPressed: cancel, child: const Text("cancel")),
-              TextButton(onPressed: () => saveFeedback(data), child: const Text("save"))
+              TextButton(
+                  onPressed: () => saveFeedback(data),
+                  child: const Text("save"))
             ],
           ),
         ),
@@ -146,7 +148,8 @@ class _HomePageState extends State<HomePage> {
                   workoutName: workoutName,
                 )));
   }
-
+  // the if statement in those function is for
+  // checking validation in widgets, if no valid, they throw custom error message
   void saveFeedback(FeedbackData data) {
     if (!_formKeyFeedback.currentState!.validate()) {
       return;
@@ -171,8 +174,8 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     _formKeyNewPublicWorkout.currentState!.save();
-      Provider.of<WorkoutData>(context, listen: false)
-          .addWorkout(newWorkoutNameController, public: true);
+    Provider.of<WorkoutData>(context, listen: false)
+        .addWorkout(newWorkoutNameController, public: true);
     Navigator.pop(context);
   }
 
