@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../data/workout_data.dart';
 import '../modules/user.dart';
+import '../modules/workout.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,21 +18,35 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String newWorkoutNameController = '';
   String feedback = '';
-  final _formKey = GlobalKey<FormState>();
+  final _formKeyFeedback = GlobalKey<FormState>();
+  final _formKeyNewWorkout = GlobalKey<FormState>();
+  final _formKeyNewPublicWorkout = GlobalKey<FormState>();
 
-  void createNewWorkout() {
+  void refresh() {
+    setState(() {
+
+    });
+  }
+
+  void createNewWorkout(String? rename) {
+    String oldName = '';
+
+    if (rename != null) {
+      oldName = rename;
+    }
     showDialog(
       context: context,
       builder: (context) => Center(
         child: SingleChildScrollView(
           child: AlertDialog(
-            title: const Text("Create new workout"),
+            title:  Text(rename == null ? "Create new workout" : "Rename your workout"),
             content: Form(
-              key: _formKey,
+              key: _formKeyNewWorkout,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextFormField(
+                    initialValue: rename,
                     onSaved: (newValue) => newWorkoutNameController = newValue!,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
@@ -50,6 +65,19 @@ class _HomePageState extends State<HomePage> {
             ),
             actions: [
               TextButton(onPressed: cancel, child: const Text("cancel")),
+              if (rename != null)
+                TextButton(onPressed: () {
+                  bool result = validateRename();
+                  if (result) {
+                    print(rename);
+                    _formKeyNewWorkout.currentState!.save();
+                    renameWorkout(newWorkoutNameController, oldName);
+                    Navigator.of(context).pop();
+                    refresh();
+                  }
+
+                }, child: const Text("save")),
+              if (rename == null)
               TextButton(onPressed: save, child: const Text("save"))
             ],
           ),
@@ -57,6 +85,17 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  bool validateRename(){
+    return _formKeyNewWorkout.currentState!.validate();
+
+  }
+
+  void renameWorkout(String newName, String oldName){
+      Workout current = Provider.of<WorkoutData>(context, listen: false).getRelevantWorkout(oldName);
+      current.name = newName;
+  }
+
 
   void giveFeedBack(FeedbackData data) {
     showDialog(
@@ -66,7 +105,7 @@ class _HomePageState extends State<HomePage> {
           child: AlertDialog(
             title: const Text("Give us Feedback!"),
             content: Form(
-              key: _formKey,
+              key: _formKeyFeedback,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -109,21 +148,31 @@ class _HomePageState extends State<HomePage> {
   }
 
   void saveFeedback(FeedbackData data) {
-    if (!_formKey.currentState!.validate()) {
+    if (!_formKeyFeedback.currentState!.validate()) {
       return;
     }
-    _formKey.currentState!.save();
+    _formKeyFeedback.currentState!.save();
     data.addFeedback(feedback);
     Navigator.pop(context);
   }
 
   void save() {
-    if (!_formKey.currentState!.validate()) {
+    if (!_formKeyNewWorkout.currentState!.validate()) {
       return;
     }
-    _formKey.currentState!.save();
+    _formKeyNewWorkout.currentState!.save();
     Provider.of<WorkoutData>(context, listen: false)
         .addWorkout(newWorkoutNameController);
+    Navigator.pop(context);
+  }
+
+  void savePublic() {
+    if (!_formKeyNewPublicWorkout.currentState!.validate()) {
+      return;
+    }
+    _formKeyNewPublicWorkout.currentState!.save();
+      Provider.of<WorkoutData>(context, listen: false)
+          .addWorkout(newWorkoutNameController, public: true);
     Navigator.pop(context);
   }
 
@@ -131,13 +180,79 @@ class _HomePageState extends State<HomePage> {
     Navigator.pop(context);
   }
 
-  void addPublicWorkOut() {}
+  void addPublicWorkOut() {
+    showDialog(
+      context: context,
+      builder: (context) => Center(
+        child: SingleChildScrollView(
+          child: AlertDialog(
+            title: const Text("Create new public workout"),
+            content: Form(
+              key: _formKeyNewPublicWorkout,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    onSaved: (newValue) => newWorkoutNameController = newValue!,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      label: Text('Workout Name'),
+                      prefixIcon: Icon(Icons.subject),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Workout Name should not be empty";
+                      }
+                    },
+                  )
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: cancel, child: const Text("cancel")),
+              TextButton(onPressed: savePublic, child: const Text("save"))
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   void showFeedback(FeedbackData data) {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        child: SizedBox(height: 300 ,child: ListView.builder(itemBuilder: (context, index) => Text(data.feedbackList[index].content), itemCount: data.feedbackList.length,)),
+      builder: (context) => AlertDialog(
+        title: const Padding(
+          padding: EdgeInsets.only(left: 14),
+          child: Text("Feedbacks from users"),
+        ),
+        content: SizedBox(
+          height: 300,
+            width: double.maxFinite,
+            child: ListView.builder(
+              itemCount: data.feedbackList.length,
+              itemBuilder: (context, index) => ListTile(
+                title: Row(
+                  children:  [
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                    ),
+                    SizedBox(
+                      width: 240,
+                      child: Text(
+                         softWrap: true,
+                        data.feedbackList[index].content,
+                      ),
+                    )
+                  ],
+                ),
+              )
+            ),
+        ),
+        actions: [
+          TextButton(onPressed: cancel, child: const Text("cancel")),
+        ],
       ),
     );
   }
@@ -146,9 +261,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final user = Provider.of<User>(context);
     FeedbackData data = Provider.of<FeedbackData>(context);
-
     return Consumer<WorkoutData>(
         builder: (context, value, child) => Scaffold(
+          backgroundColor: const Color.fromRGBO(217, 216, 218, 1),
               appBar: AppBar(
                   title: const Text(
                     "Workout tracker",
@@ -191,7 +306,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   if (user.isAdmin) const SizedBox(width: 50),
                   FloatingActionButton.extended(
-                    onPressed: createNewWorkout,
+                    onPressed: () => createNewWorkout(null),
                     icon: const Icon(Icons.add),
                     label: const Text('Add workout'),
                   ),
@@ -205,13 +320,24 @@ class _HomePageState extends State<HomePage> {
                             const Align(
                               alignment: Alignment.centerLeft,
                             ),
+                            if (value.getWorkoutList()[index].isPublic)
+                              Text(
+                              value.getWorkoutList()[index].name,
+                              textAlign: TextAlign.left,
+                              style: const TextStyle(fontSize: 22),
+                            ),
+                            if (!value.getWorkoutList()[index].isPublic)
                             TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  print(value.getWorkoutList()[index].name);
+                                  createNewWorkout(value.getWorkoutList()[index].name);
+                                },
                                 child: Text(
                                   value.getWorkoutList()[index].name,
                                   textAlign: TextAlign.left,
                                   style: const TextStyle(fontSize: 22),
-                                )),
+                                )
+                            ),
                           ],
                         ),
                         trailing: IconButton(
@@ -219,7 +345,8 @@ class _HomePageState extends State<HomePage> {
                           onPressed: () => goToWorkoutPage(
                               value.getWorkoutList()[index].name),
                         ),
-                      )),
+                      )
+              ),
             ));
   }
 }
